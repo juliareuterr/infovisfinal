@@ -1,6 +1,4 @@
 var svg = d3.select('svg');
-svg.append('g').attr('id', 'links')
-svg.append('g').attr('id', 'nodes')
 
 // width and height of map
 let w = 800;
@@ -50,22 +48,20 @@ d3.csv('LGBT_Survey_DailyLife.csv').then(function(dataset, json) {
     // defining path generator for geoJSON
     let path = d3.geoPath()
         .projection(projection);
+    var textlayer;
 
     // loading in geoJSON data
     d3.json('europeMed.json').then(function(json) {
         initializeData(dataset, json)
         // binding data and creating one path per GeoJSON feature
-        // var enter = svg.selectAll('svg')
-        //     .data(json.features)
-        //     .enter()
-        //     .append('g');
+        var enter = svg.selectAll('g')
+            .data(json.features)
+            .enter()
+            .append('g');
 
-
-        svg.selectAll('#links').data(json.features).enter().append('path')
+        enter.append('path')
             .attr('d', path)
-            .attr('stroke', 'white')
             .attr('class', 'normalpath')
-            .attr('stroke-width', 1.7)
             .attr('fill', function(d, i) {
                 // conditional fill here https://www.color-hex.com/color-palette/1020309
                 let obj = calculateScore(d.properties.NAME);
@@ -84,37 +80,22 @@ d3.csv('LGBT_Survey_DailyLife.csv').then(function(dataset, json) {
                     return '#e9e9e9'
                 }
             })
-            .on('mouseover', function(d) {
-                // d3.select(this).attr('class', 'hoverpath');
-                // svg.append('select').
-                
-                // ;
-                // clone_d3_selection()
-                //console.log('hi');
-                svg.selectAll('#links').append('path')
-                .attr('d', path)
-                .attr('id', 'pathSelection')
-                .attr('class', 'hoverpath')
-                .attr('stroke', 'lightgrey')
-                .attr('stroke-width', 1.7)
-                // .attr('fill', 'black')
+            .on('mouseover', function(d, i) {
+                svg.append('text').text(d.properties.NAME)
+                    .attr('class', 'hovertext')
+                    .attr('id', 'hoveringtext')
+                    .attr('x', function(data, i) {
+                        return path.centroid(d)[0];
+                    })
+                    .attr('y', function(data, i) {
+                        return path.centroid(d)[1];
+                    })
+                    .attr('pointer-events', 'none');
             })
-            .on('mouseout', function(d) {
-                //console.log("bye");
-                svg.select('#pathSelection').remove();                
+            .on('mouseout', function(d, i) {
+                console.log(d3.select('#hoveringtext'));
+                d3.select('#hoveringtext').remove();
             });
-
-        svg.selectAll('#nodes').data(json.features).enter().append('text')
-            .attr('x', function(d) {
-                return path.centroid(d)[0];
-            })
-            .attr('y', function(d) {
-                return path.centroid(d)[1];
-            })
-            .text(function(d, i) {
-                return d.properties.NAME;
-            })
-            .attr('class', 'countryname');
     });
 });
 
@@ -143,21 +124,4 @@ function calculateScore(countryName) {
     }
     countryScores.set(countryName, score);
     return {score: score, found: found};
-}
-
-function clone_d3_selection(selection, i) {
-    // Assume the selection contains only one object, or just work
-    // on the first object. 'i' is an index to add to the id of the
-    // newly cloned DOM element.
-    var attr = selection.node().attributes;
-    var length = attr.length;
-    var node_name = selection.property("nodeName");
-    var parent = d3.select(selection.node().parentNode);
-    var cloned = parent.append(node_name)
-        .attr("id", selection.attr("id") + i);
-    for (var j = 0; j < length; j++) { // Iterate on attributes and skip on "id"
-        if (attr[j].nodeName == "id") continue;
-        cloned.attr(attr[j].name,attr[j].value);
-    }
-    return cloned;
 }
