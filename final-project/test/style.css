@@ -1,0 +1,43 @@
+body {
+    font-family: "Open Sans";
+}
+
+#main {
+    margin: 10px 20px;
+}
+
+#map {
+    float:left;
+}
+
+.normalpath {
+    opacity: 0.7;
+    stroke-width: 1.7;
+    stroke: white;
+    z-index: -100;
+}
+
+.hoverpath {
+    opacity: 1;
+    stroke-width: 2.0;
+    stroke: darkgrey;
+    z-index: 100;
+}
+
+.normaltext {
+    visibility: hidden;
+    font-family: sans-serif;
+    font-size: 20px;
+    position:absolute;
+    text-anchor: middle;
+    fill: black;
+}
+
+.hovertext {
+    visibility: visible;
+    cursor: default;
+    fill: black;
+    pointer-events: none;
+    position: relative;
+    z-index: 1;
+}
