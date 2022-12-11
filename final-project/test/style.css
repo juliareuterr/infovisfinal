@@ -45,3 +45,38 @@ body {
     text-anchor: middle;
     fill: black;
 }
+
+.title {
+    font-family: sans-serif;
+    font-weight: bold;
+    font-size: 24px;
+    fill: black;
+}
+
+.qheader {
+    font-family: sans-serif;
+    font-size: 16px;
+    fill: black;
+    font-weight:bold;
+}
+
+.qbutton {
+    height: 40px;
+    pointer-events: all;
+    fill: rgb(233, 233, 233);
+}
+
+.qbuttonpressed {
+    height: 40px;
+    pointer-events: all;
+    fill: rgb(209, 209, 209);
+}
+
+.qtext {
+    font-family: sans-serif;
+    text-anchor: middle;
+    font-size: 16px;
+    fill: black;
+    font-weight:bold;
+    pointer-events: none;
+}
