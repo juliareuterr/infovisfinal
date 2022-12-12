@@ -28,6 +28,13 @@ body {
     z-index: 100;
 }
 
+.selectedpath {
+    opacity: 1;
+    stroke-width: 3.0;
+    stroke: white;
+    z-index: 100;
+}
+
 .normaltext {
     visibility: hidden;
     font-family: sans-serif;
@@ -43,6 +50,7 @@ body {
     font-size: 16px;
     position:absolute;
     text-anchor: middle;
+    font-weight:bold;
     fill: black;
 }
 
@@ -79,4 +87,15 @@ body {
     fill: black;
     font-weight:bold;
     pointer-events: none;
+}
+
+.axis path,
+.axis line {
+    stroke: darkgrey;
+}
+
+.axis text {
+    font-family: sans-serif;
+    font-size: 12px;
+    fill: darkgrey;
 }
