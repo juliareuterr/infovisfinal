@@ -418,8 +418,7 @@ function updateBarChart(countryCSV) {
         .append('g')
         .attr('class', 'bar')
         .style('fill', function(d) {return colorScale(d.key)});
-
-    
+    // add rectangles for each bar
     barEnter.selectAll('rect')
         .data(function(d) { return d; })
 		.enter()
