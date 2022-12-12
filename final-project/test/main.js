@@ -38,6 +38,11 @@ const countryScores = new Map(); // key: countryname, value: current (?) score
 const countryPercentages = new Map(); // key: countryname, value: array of percentages to each answer, [0] is very widespread, [3] is very rare
 var selectedCountry = null;
 
+// color scale
+var colorScale = d3.scaleOrdinal()
+    .domain(['Very widespread', 'Fairly widespread', 'Fairly rare', 'Very rare', 'Don`t know'])
+    .range(['#ff5035','#ff7c68','#ffa89b','#ffc3ba', '#e9e9e9']);
+
 topSVG.append('text')
     .text('Hostility Towards LGBT People in the EU')
     .attr('class', 'title')
@@ -178,7 +183,6 @@ d3.csv('LGBT_Survey_DailyLife.csv').then(function(dataset, json) {
             })
             .on('click', function(d, i) {
                 selectedCountry = d.properties.NAME;
-                // mapSVG.append(this);
                 d3.selectAll('.selectedpath').attr('class', 'normalpath');
                 d3.select(this).attr('class', 'selectedpath');
                 d3.select('#selectedtext').remove();
@@ -193,7 +197,6 @@ d3.csv('LGBT_Survey_DailyLife.csv').then(function(dataset, json) {
                     return path.centroid(d)[1];
                 })
                 .attr('pointer-events', 'none');
-
 
                 // array that holds relevant question for selected country and all identities
                 countryCSV = [];
@@ -246,15 +249,10 @@ function initializeScores() {
         countryScores.set(name, 0);
         let temp = countryPercentages.get(name);
         if (temp != null && temp.length > 0) {
-            if (csv[i].answer == 'Very widespread') {
-                temp[0] += csv[i].percentage;
-            } else if (csv[i].answer == 'Fairly widespread') {
-                temp[1] += csv[i].percentage;
-            } else if (csv[i].answer == 'Fairly rare') {
-                temp[2] += csv[i].percentage;
-            } else if (csv[i].answer == 'Very rare') {
-                temp[3] += csv[i].percentage;
-            }
+            if (csv[i].answer == 'Very widespread') {temp[0] += csv[i].percentage;} 
+            else if (csv[i].answer == 'Fairly widespread') {temp[1] += csv[i].percentage;} 
+            else if (csv[i].answer == 'Fairly rare') {temp[2] += csv[i].percentage;} 
+            else if (csv[i].answer == 'Very rare') {temp[3] += csv[i].percentage;}
         } else {
             countryPercentages.set(name, [0,0,0,0]);
         }
@@ -271,88 +269,64 @@ function updateCountries() {
     }
     mapSVG.selectAll('g')
         .selectAll('path')
-            .attr('fill', function(d, i) {
-                let obj = updateScore(d.properties.NAME);
-                if (obj.found) {
-                    var s = obj.score;
-                    if (s > (250 * numofbuttons)) { // best
-                        return '#ffc3ba';
-                    } else if (s > (225 * numofbuttons)) {
-                        return '#ffa89b';
-                    } else if (s > (-25 * numofbuttons)) {
-                        return '#ff7c68'
-                    } else { // worst
-                        return '#ff5035';
-                    }
-                } else {
-                    return '#e9e9e9';
-                }
+            .each(function(d, i) {
+                updateScore(d.properties.NAME);
             });
+
+    var ok = [];
+    for (let [key, value] of countryScores) {
+        if (value != null && value != 0 && !isNaN(value)) {
+            ok.push(value);
+        }
+    }
+    console.log(ok);
+    var min = Math.min(...ok);
+    var max = Math.max(...ok);
+    var diff = max-min;
+
+
+    mapSVG.selectAll('g')
+        .selectAll('path')
+        .attr('fill', function(d, i) {
+            let obj = updateScore(d.properties.NAME);
+            if (obj.found) {
+                var s = obj.score;
+                if (s < min + (diff/4)) { 
+                    return colorScale('Very widespread');
+                } else if (s < min + (diff/2)) {
+                    return colorScale('Fairly widespread');
+                } else if (s < min + (diff*3/4)) {
+                    return colorScale('Fairly rare');
+                } else { // worst
+                    return colorScale('Very rare');
+                }
+            } else {
+                return '#e9e9e9';
+            }
+        })
+        
 }
 
 function updateScore(countryName) {
-    var score;
-    if (countryScores.has(countryName)) {
-        score = Number(countryScores.get(countryName));
-    } else {
-        score = 0;
-    }
-    var found = false;
-    // check which questions are selected
+    var score = 0;
+    var times = 0;
+    var found = false; // keeping track of whether we succeeded in finding the country in the csv
     for (let i = 0; i < csv.length; i++) {
-        if (csv[i].CountryCode == countryName) {
-            if (selectedButtons.get(0) && csv[i].question_code == "b1_a") {
-                var found = true;
-                if (csv[i].answer == 'Very widespread') { // very widespread hate = lower score
-                    score -= Number(csv[i].percentage);
-                } else if (csv[i].answer == 'Fairly widespread') {
-                    score -= 0;
-                } else if (csv[i].answer == 'Fairly rare') {
-                    score += Number(csv[i].percentage);
-                } else if (csv[i].answer == 'Very rare') {
-                    score += Number((2 * csv[i].percentage));
-                }
-            }
-            if (selectedButtons.get(1) && csv[i].question_code == "b1_b") {
-                var found = true;
-                if (csv[i].answer == 'Very widespread') { // very widespread hate = lower score
-                    score -= Number(csv[i].percentage);
-                } else if (csv[i].answer == 'Fairly widespread') {
-                    score -= 0;
-                } else if (csv[i].answer == 'Fairly rare') {
-                    score += Number(csv[i].percentage);
-                } else if (csv[i].answer == 'Very rare') {
-                    score += Number((2 * csv[i].percentage));
-                }
-            }
-            if (selectedButtons.get(2) && csv[i].question_code == "b1_c") {
-                var found = true;
-                if (csv[i].answer == 'Very widespread') { // very widespread hate = lower score
-                    score -= Number(csv[i].percentage);
-                } else if (csv[i].answer == 'Fairly widespread') {
-                    score -= 0;
-                } else if (csv[i].answer == 'Fairly rare') {
-                    score += Number(csv[i].percentage);
-                } else if (csv[i].answer == 'Very rare') {
-                    score += Number((2 * csv[i].percentage));
-                }
-            }
-            if (selectedButtons.get(3) && csv[i].question_code == "b1_d") {
-                var found = true;
-                if (csv[i].answer == 'Very widespread') { // very widespread hate = lower score
-                    score -= Number(csv[i].percentage);
-                } else if (csv[i].answer == 'Fairly widespread') {
-                    score -= 0;
-                } else if (csv[i].answer == 'Fairly rare') {
-                    score += Number(csv[i].percentage);
-                } else if (csv[i].answer == 'Very rare') {
-                    score += Number((2 * csv[i].percentage));
-                }
-            }
+        let row = csv[i];
+        // check if correct country, and if the answer is for the selected questions (from buttons)
+        if (csv[i].CountryCode == countryName && ((selectedButtons.get(0) && row.question_code == "b1_a") || (selectedButtons.get(1) && row.question_code == "b1_b")
+        || (selectedButtons.get(2) && row.question_code == "b1_c") || (selectedButtons.get(3) && row.question_code == "b1_d"))) {
+            var found = true;
+            if (row.answer == 'Very widespread') {score += Number(row.percentage); times+=1;}
+            else if (row.answer == 'Fairly widespread') {score += (2*Number(row.percentage)); times+=1;}
+            else if (row.answer == 'Fairly rare') {score += (3*Number(row.percentage)); times+=1;}
+            else if (row.answer == 'Very rare') {score += (4*Number(row.percentage)); times+=1;}
+            // if (row.answer == 'Don`t know') score += Number(row.percentage);
         }
     }
-    countryScores.set(countryName, score);
-    return {score: score, found: found};
+    countryScores.set(countryName, score/times);
+    // console.log(times);
+    return {score: score/times, found: found, times: times};
 }
 
 
@@ -388,10 +362,10 @@ function updateBarChart(countryCSV) {
         if ((selectedButtons.get(0) && countryCSV[i].question_code == "b1_a") || (selectedButtons.get(1) && countryCSV[i].question_code == "b1_b")
         || (selectedButtons.get(2) && countryCSV[i].question_code == "b1_c") || (selectedButtons.get(3) && countryCSV[i].question_code == "b1_d")) {
             if (countryCSV[i].answer == 'Very widespread') data[index].veryWidespread += Number(countryCSV[i].percentage); 
-            if (countryCSV[i].answer == 'Fairly widespread') data[index].fairlyWidespread += Number(countryCSV[i].percentage);
-            if (countryCSV[i].answer == 'Fairly rare') data[index].fairlyRare += Number(countryCSV[i].percentage); 
-            if (countryCSV[i].answer == 'Very rare') data[index].veryRare += Number(countryCSV[i].percentage);
-            if (countryCSV[i].answer == 'Don`t know') data[index].idk += Number(countryCSV[i].percentage);
+            else if (countryCSV[i].answer == 'Fairly widespread') data[index].fairlyWidespread += Number(countryCSV[i].percentage);
+            else if (countryCSV[i].answer == 'Fairly rare') data[index].fairlyRare += Number(countryCSV[i].percentage); 
+            else if (countryCSV[i].answer == 'Very rare') data[index].veryRare += Number(countryCSV[i].percentage);
+            else if (countryCSV[i].answer == 'Don`t know') data[index].idk += Number(countryCSV[i].percentage);
         }
     }
 
@@ -410,11 +384,6 @@ function updateBarChart(countryCSV) {
 
     // stacking data
     var series = stack(data);
-
-    // color scale
-    var colorScale = d3.scaleOrdinal()
-        .domain(['Very widespread', 'Fairly widespread', 'Fairly rare', 'Very rare', 'Don`t know'])
-        .range(['#ff5035','#ff7c68','#ffa89b','#ffc3ba', '#e9e9e9']);
         
     // setting up scales
     xScale = d3.scaleLinear()
@@ -494,11 +463,6 @@ function blankBarChart() {
     var stack = d3.stack()
         .keys(['veryWidespread', 'fairlyWidespread', 'fairlyRare', 'veryRare', 'idk']);
     var series = stack(data);
-
-    // color scale
-    var colorScale = d3.scaleOrdinal()
-        .domain(['Very widespread', 'Fairly widespread', 'Fairly rare', 'Very rare', 'Don`t know'])
-        .range(['#ff5035','#ff7c68','#ffa89b','#ffc3ba', '#e9e9e9']);
 
     // setting up scales
     xScale = d3.scaleLinear()
