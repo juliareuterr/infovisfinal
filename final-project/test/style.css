@@ -94,9 +94,9 @@ body {
 .qtext {
     font-family: sans-serif;
     text-anchor: middle;
-    font-size: 16px;
+    font-size: 15px;
     fill: black;
-    font-weight:bold;
+    font-weight:600;
     pointer-events: none;
 }
 
