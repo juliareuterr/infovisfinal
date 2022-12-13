@@ -604,24 +604,12 @@ function updateBarChart(countryCSV) {
         .attr('id', function(d, i) {
             return 'bar'+i;
         })
-        .attr('class', 'bar')
-        .style('fill', function(d, i) { return colorScale(d.key); });
+        .attr('class', 'bar');
     // add rectangles for each bar
     barEnter.selectAll('rect')
         .data(function(d) { return d; })
 		.enter()
         .append('rect')
-        .style('fill', function(d, i) { 
-            // console.log(this.parentNode)
-            // console.log(d3.select(this.parentNode).attr('id'));
-            var id = d3.select(this.parentNode).attr('id');
-            if (id == 'bar0') return colorScale('Very widespread');
-            else if (id == 'bar1') return colorScale('Fairly widespread');
-            else if (id == 'bar2') return colorScale('Fairly rare');
-            else if (id == 'bar3') return colorScale('Very rare');
-            else return '#e9e9e9'
-            // return colorScale(t); 
-        })
         .attr('width', function(d, i) {
             return (xScale(d[1]*100) - xScale(d[0]*100));
         })
@@ -638,9 +626,14 @@ function updateBarChart(countryCSV) {
             else if (i == 4) identity = "Transgender";
             return chartPadding + yScale(identity);
         })
-        .attr('fill', function(d, i) {
+        .style('fill', function(d, i) {
             if ((i==0 && idenButton0) || (i==1 && idenButton1) || (i==2 && idenButton2) || (i==3 && idenButton3) || (i==4 && idenButton4)) {
-                return;
+                var id = d3.select(this.parentNode).attr('id');
+                if (id == 'bar0') return colorScale('Very widespread');
+                else if (id == 'bar1') return colorScale('Fairly widespread');
+                else if (id == 'bar2') return colorScale('Fairly rare');
+                else if (id == 'bar3') return colorScale('Very rare');
+                else return '#e9e9e9'
             } else {
                 return '#e9e9e9';
             }
@@ -762,32 +755,6 @@ function initializeBarChart() {
                 else if (i == 3) identity = "Bisexual men";
                 else if (i == 4) identity = "Transgender";
                 return chartPadding + yScale(identity);
-            // })
-            // .on('mouseover', function(d, i) {console.log(validSelectedCountry);
-            //     if(validSelectedCountry) {
-            //     barEnter.append('text').text(function(d, i) {
-            //         //check whether this is very hostile, fairly hostile...
-            //         return 'hiiii';
-            //     })
-            //         .attr('class', 'hovertext')
-            //         .attr('id', 'hovering2text')
-            //         .attr('x', function (d, i) {
-            //             return 100;
-            //         })
-            //         .attr('y', function(d, i) {
-            //             var identity;
-            //             if (i == 0) identity = "Lesbian";
-            //             else if (i == 1) identity = "Gay";
-            //             else if (i == 2) identity = "Bisexual women";
-            //             else if (i == 3) identity = "Bisexual men";
-            //             else if (i == 4) identity = "Transgender";
-            //             return 100;
-            //         })
-            //         .attr('pointer-events', 'none');
-            // }})
-            // .on('mouseout', function(d, i) {
-            //     if(validSelectedCountry)
-            //     d3.select('#hovering2text').remove();
             });
     selectedCountry = 0;
 }
