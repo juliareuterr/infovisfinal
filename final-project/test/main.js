@@ -34,6 +34,13 @@ const buttonBorder = 20;
 var xAxis, yAxis;
 var xScale, yScale;
 
+//identity buttons - only need to update value on idenButton click if it's a global var
+var idenButton0;
+var idenButton1;
+var idenButton2;
+var idenButton3;
+var idenButton4;
+
 const csv = []; // array that holds relevant questions from all countries and all identities
 const countryScores = new Map(); // key: countryname, value: current (?) score
 const countryPercentages = new Map(); // key: countryname, value: array of percentages to each answer, [0] is very widespread, [3] is very rare
@@ -121,12 +128,14 @@ questionButtons.selectAll('rect')
         var button1 = selectedButtons.get(1);
         var button2 = selectedButtons.get(2);
         var button3 = selectedButtons.get(3);
-        for (let i = 0; i < csv.length; ++i) {
+
+        //filter the csv by question code and subset
+        for (let i = 0; i < csv.length; i++) {
             if ((csv[i].CountryCode == selectedCountry)) {
-                if (csv[i].question_code == "b1_a" && button0) countryCSV.push(csv[i]);
-                if (csv[i].question_code == "b1_b" && button1) countryCSV.push(csv[i]);
-                if (csv[i].question_code == "b1_c" && button2) countryCSV.push(csv[i]);
-                if (csv[i].question_code == "b1_d" && button3) countryCSV.push(csv[i]);
+                if ((csv[i].question_code == "b1_a" && button0) && filterIdentities(i)) countryCSV.push(csv[i]);
+                if ((csv[i].question_code == "b1_b" && button1) && filterIdentities(i)) countryCSV.push(csv[i]);
+                if ((csv[i].question_code == "b1_c" && button2) && filterIdentities(i)) countryCSV.push(csv[i]);
+                if ((csv[i].question_code == "b1_d" && button3) && filterIdentities(i)) countryCSV.push(csv[i]);
             }
         }
         if (countryCSV.length > 0) {
@@ -199,8 +208,29 @@ idenButtons.selectAll('rect')
 
         // array that holds relevant question for selected country and all identities
         countryCSV = [];
+        
+        idenButton0 = selectedIdenButtons.get(0);
+        idenButton1 = selectedIdenButtons.get(1);
+        idenButton2 = selectedIdenButtons.get(2);
+        idenButton3 = selectedIdenButtons.get(3);
+        idenButton4 = selectedIdenButtons.get(4);
 
-        filterIdentities();
+        var button0 = selectedButtons.get(0);
+        var button1 = selectedButtons.get(1);
+        var button2 = selectedButtons.get(2);
+        var button3 = selectedButtons.get(3);
+
+        //filter the csv by question code and subset
+        for (let i = 0; i < csv.length; i++) {
+            if ((csv[i].CountryCode == selectedCountry)) {
+                if ((csv[i].question_code == "b1_a" && button0) && filterIdentities(i)) countryCSV.push(csv[i]);
+                if ((csv[i].question_code == "b1_b" && button1) && filterIdentities(i)) countryCSV.push(csv[i]);
+                if ((csv[i].question_code == "b1_c" && button2) && filterIdentities(i)) countryCSV.push(csv[i]);
+                if ((csv[i].question_code == "b1_d" && button3) && filterIdentities(i)) countryCSV.push(csv[i]);
+            }
+        }
+
+        console.log(countryCSV);
 
         if (countryCSV.length > 0) {
             updateBarChart(countryCSV);
@@ -214,23 +244,14 @@ idenButtons.selectAll('.qtext')
         else return (idenRectX[i] + idenButtonsLength[i]/2 + buttonBorder/2);//(30 + Number(d3.select(this.previousSibling).attr('x')) + Number(buttonsLength[i])/2);
     });
 
-function filterIdentities() {
-    // only include info for relevant country
-    // for the 5 identities we're using
-    var idenButton0 = selectedIdenButtons.get(0);
-    var idenButton1 = selectedIdenButtons.get(1);
-    var idenButton2 = selectedIdenButtons.get(2);
-    var idenButton3 = selectedIdenButtons.get(3);
-    var idenButton4 = selectedIdenButtons.get(4);
-    for (let i = 0; i < csv.length; ++i) {
-        if ((csv[i].CountryCode == selectedCountry)) {
-            if (csv[i].subset == "Lesbian" && idenButton0) countryCSV.push(csv[i]);
-            if (csv[i].subset == "Gay" && idenButton1) countryCSV.push(csv[i]);
-            if (csv[i].subset == "Bisexual women" && idenButton2) countryCSV.push(csv[i]);
-            if (csv[i].subset == "Bisexual men" && idenButton3) countryCSV.push(csv[i]);
-            if (csv[i].subset == "Transgender" && idenButton4) countryCSV.push(csv[i]);
-        }
-    }
+//pass in index of csv, return whether or not that index contains a specific identity
+function filterIdentities(i) {
+    if (csv[i].subset == "Lesbian" && idenButton0) return true;
+    if (csv[i].subset == "Gay" && idenButton1) return true;
+    if (csv[i].subset == "Bisexual women" && idenButton2) return true;
+    if (csv[i].subset == "Bisexual men" && idenButton3) return true;
+    if (csv[i].subset == "Transgender" && idenButton4) return true;
+    return false;
 }
 
 
@@ -300,16 +321,16 @@ d3.csv('LGBT_Survey_DailyLife.csv').then(function(dataset, json) {
                 var button1 = selectedButtons.get(1);
                 var button2 = selectedButtons.get(2);
                 var button3 = selectedButtons.get(3);
+
+                //filter the csv by question code and subset
                 for (let j = 0; j < csv.length; j++) {
                     if ((csv[j].CountryCode == d.properties.NAME)) {
-                        if (csv[j].question_code == "b1_a" && button0) countryCSV.push(csv[j]);
-                        if (csv[j].question_code == "b1_b" && button1) countryCSV.push(csv[j]);
-                        if (csv[j].question_code == "b1_c" && button2) countryCSV.push(csv[j]);
-                        if (csv[j].question_code == "b1_d" && button3) countryCSV.push(csv[j]);
+                        if ((csv[j].question_code == "b1_a" && button0) && filterIdentities(j)) countryCSV.push(csv[j]);
+                        if ((csv[j].question_code == "b1_b" && button1) && filterIdentities(j)) countryCSV.push(csv[j]);
+                        if ((csv[j].question_code == "b1_c" && button2) && filterIdentities(j)) countryCSV.push(csv[j]);
+                        if ((csv[j].question_code == "b1_d" && button3) && filterIdentities(j)) countryCSV.push(csv[j]);
                     }
                 }
-
-                filterIdentities();
 
                 // only update chart if the country has data
                 if (countryCSV.length > 0) {
