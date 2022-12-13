@@ -41,6 +41,10 @@ var idenButton2;
 var idenButton3;
 var idenButton4;
 
+var countryCSV;
+
+var numofbuttons;
+
 const csv = []; // array that holds relevant questions from all countries and all identities
 const countryScores = new Map(); // key: countryname, value: current (?) score
 const countryPercentages = new Map(); // key: countryname, value: array of percentages to each answer, [0] is very widespread, [3] is very rare
@@ -117,7 +121,6 @@ questionButtons.selectAll('rect')
             selectedButtons.set(i, true);
             topSVG.select('#rect' + i).attr('class', 'qbuttonpressed');
         }
-        updateCountries();
 
         // array that holds relevant question for selected country and all identities
         countryCSV = [];
@@ -129,20 +132,24 @@ questionButtons.selectAll('rect')
         var button2 = selectedButtons.get(2);
         var button3 = selectedButtons.get(3);
 
-        //filter the csv by question code and subset
+        //filter the csv by question code
         for (let i = 0; i < csv.length; i++) {
             if ((csv[i].CountryCode == selectedCountry)) {
-                if ((csv[i].question_code == "b1_a" && button0) && filterIdentities(i)) countryCSV.push(csv[i]);
-                if ((csv[i].question_code == "b1_b" && button1) && filterIdentities(i)) countryCSV.push(csv[i]);
-                if ((csv[i].question_code == "b1_c" && button2) && filterIdentities(i)) countryCSV.push(csv[i]);
-                if ((csv[i].question_code == "b1_d" && button3) && filterIdentities(i)) countryCSV.push(csv[i]);
+                if ((csv[i].question_code == "b1_a" && button0)) countryCSV.push(csv[i]);
+                if ((csv[i].question_code == "b1_b" && button1)) countryCSV.push(csv[i]);
+                if ((csv[i].question_code == "b1_c" && button2)) countryCSV.push(csv[i]);
+                if ((csv[i].question_code == "b1_d" && button3)) countryCSV.push(csv[i]);
             }
         }
+
+        // update coloring of map to reflect selected buttons
+        updateCountries();
         if (countryCSV.length > 0) {
             updateBarChart(countryCSV);
         } else {
             blankBarChart();
-        }    });
+        }    
+    });
 
 questionButtons.selectAll('.qtext')
     .attr('x', function(d, i) { 
@@ -163,7 +170,7 @@ const idenRectX = [];
 
 const selectedIdenButtons = new Map();
 for (let i = 0; i < 5; i++) {
-    selectedIdenButtons.set(i, false);
+    selectedIdenButtons.set(i, true);
 }
 
 var idenButtons = bottomSVG.selectAll('rect')
@@ -172,7 +179,7 @@ var idenButtons = bottomSVG.selectAll('rect')
 
 idenButtons.append('rect')
     .attr('id', function(d, i) {return 'rect' + i;})
-    .attr('class', 'qbutton')
+    .attr('class', 'qbuttonpressed')
     .attr('y', titlePadding*4/3)
     .attr('rx', 20)
     .attr('ry', 20)
@@ -204,8 +211,6 @@ idenButtons.selectAll('rect')
             selectedIdenButtons.set(i, true);
             bottomSVG.select('#rect' + i).attr('class', 'qbuttonpressed');
         }
-        updateCountries();
-
         // array that holds relevant question for selected country and all identities
         countryCSV = [];
         
@@ -223,37 +228,26 @@ idenButtons.selectAll('rect')
         //filter the csv by question code and subset
         for (let i = 0; i < csv.length; i++) {
             if ((csv[i].CountryCode == selectedCountry)) {
-                if ((csv[i].question_code == "b1_a" && button0) && filterIdentities(i)) countryCSV.push(csv[i]);
-                if ((csv[i].question_code == "b1_b" && button1) && filterIdentities(i)) countryCSV.push(csv[i]);
-                if ((csv[i].question_code == "b1_c" && button2) && filterIdentities(i)) countryCSV.push(csv[i]);
-                if ((csv[i].question_code == "b1_d" && button3) && filterIdentities(i)) countryCSV.push(csv[i]);
+                if ((csv[i].question_code == "b1_a" && button0)) countryCSV.push(csv[i]);
+                if ((csv[i].question_code == "b1_b" && button1)) countryCSV.push(csv[i]);
+                if ((csv[i].question_code == "b1_c" && button2)) countryCSV.push(csv[i]);
+                if ((csv[i].question_code == "b1_d" && button3)) countryCSV.push(csv[i]);
             }
         }
-
-        console.log(countryCSV);
-
+        // update coloring of map to reflect selected identity buttons
+        updateCountries();
         if (countryCSV.length > 0) {
             updateBarChart(countryCSV);
         } else {
             blankBarChart();
-        }    });
+        }   
+    });
 
 idenButtons.selectAll('.qtext')
     .attr('x', function(d, i) { 
         if (i==0) return titlePadding + idenButtonsLength[i]/2 + buttonBorder/2;
         else return (idenRectX[i] + idenButtonsLength[i]/2 + buttonBorder/2);//(30 + Number(d3.select(this.previousSibling).attr('x')) + Number(buttonsLength[i])/2);
     });
-
-//pass in index of csv, return whether or not that index contains a specific identity
-function filterIdentities(i) {
-    if (csv[i].subset == "Lesbian" && idenButton0) return true;
-    if (csv[i].subset == "Gay" && idenButton1) return true;
-    if (csv[i].subset == "Bisexual women" && idenButton2) return true;
-    if (csv[i].subset == "Bisexual men" && idenButton3) return true;
-    if (csv[i].subset == "Transgender" && idenButton4) return true;
-    return false;
-}
-
 
 d3.csv('LGBT_Survey_DailyLife.csv').then(function(dataset, json) {
     // defining map projection
@@ -265,7 +259,6 @@ d3.csv('LGBT_Survey_DailyLife.csv').then(function(dataset, json) {
     // defining path generator for geoJSON
     let path = d3.geoPath()
         .projection(projection);
-    var textlayer;
 
     // loading in geoJSON data
     d3.json('europeMed.json').then(function(json) {
@@ -279,7 +272,23 @@ d3.csv('LGBT_Survey_DailyLife.csv').then(function(dataset, json) {
         enter.append('path')
             .attr('d', path)
             .attr('class', 'normalpath')
-            .attr('fill', '#e9e9e9')
+            .attr('fill', function(d, i) {
+                let obj = updateScore(d.properties.NAME);
+                if (obj.found) {
+                    var s = obj.score;
+                    if (s < min + (diff/4)) { 
+                        return colorScale('Very widespread');
+                    } else if (s < min + (diff/2)) {
+                        return colorScale('Fairly widespread');
+                    } else if (s < min + (diff*3/4)) {
+                        return colorScale('Fairly rare');
+                    } else { // worst
+                        return colorScale('Very rare');
+                    }
+                } else {
+                    return '#e9e9e9';
+                }
+            })
             .on('mouseover', function(d, i) {
                 mapSVG.append('text').text(d.properties.NAME)
                     .attr('class', 'hovertext')
@@ -325,14 +334,14 @@ d3.csv('LGBT_Survey_DailyLife.csv').then(function(dataset, json) {
                 //filter the csv by question code and subset
                 for (let j = 0; j < csv.length; j++) {
                     if ((csv[j].CountryCode == d.properties.NAME)) {
-                        if ((csv[j].question_code == "b1_a" && button0) && filterIdentities(j)) countryCSV.push(csv[j]);
-                        if ((csv[j].question_code == "b1_b" && button1) && filterIdentities(j)) countryCSV.push(csv[j]);
-                        if ((csv[j].question_code == "b1_c" && button2) && filterIdentities(j)) countryCSV.push(csv[j]);
-                        if ((csv[j].question_code == "b1_d" && button3) && filterIdentities(j)) countryCSV.push(csv[j]);
+                        if ((csv[j].question_code == "b1_a" && button0)) countryCSV.push(csv[j]);
+                        if ((csv[j].question_code == "b1_b" && button1)) countryCSV.push(csv[j]);
+                        if ((csv[j].question_code == "b1_c" && button2)) countryCSV.push(csv[j]);
+                        if ((csv[j].question_code == "b1_d" && button3)) countryCSV.push(csv[j]);
                     }
                 }
 
-                // only update chart if the country has data
+                // update coloring of map to reflect selected buttons
                 if (countryCSV.length > 0) {
                     updateBarChart(countryCSV);
                 } else {
@@ -342,9 +351,15 @@ d3.csv('LGBT_Survey_DailyLife.csv').then(function(dataset, json) {
     });
 });
 
-var countryCSV;
-
-var numofbuttons;
+//pass in index of csv, return whether or not that index contains a specific identity
+function filterIdentities(i) {
+    if (csv[i].subset == "Lesbian" && idenButton0) return true;
+    if (csv[i].subset == "Gay" && idenButton1) return true;
+    if (csv[i].subset == "Bisexual women" && idenButton2) return true;
+    if (csv[i].subset == "Bisexual men" && idenButton3) return true;
+    if (csv[i].subset == "Transgender" && idenButton4) return true;
+    return false;
+}
 
 function initializeData(dataset, json) {
     for (let i = 0; i < dataset.length; ++i) {
@@ -355,6 +370,12 @@ function initializeData(dataset, json) {
         // b1_a is offensive language by politicians, b1_b is casual jokes
         // b1_c is expressions of hatred and aversion, b1_d is assaults and harrassment
     }
+    // initialize identity buttons
+    idenButton0 = selectedIdenButtons.get(0);
+    idenButton1 = selectedIdenButtons.get(1);
+    idenButton2 = selectedIdenButtons.get(2);
+    idenButton3 = selectedIdenButtons.get(3);
+    idenButton4 = selectedIdenButtons.get(4);
     // loop through added ones, check country
     initializeScores();
 }
@@ -395,7 +416,6 @@ function updateCountries() {
             ok.push(value);
         }
     }
-    console.log(ok);
     var min = Math.min(...ok);
     var max = Math.max(...ok);
     var diff = max-min;
@@ -419,7 +439,7 @@ function updateCountries() {
             } else {
                 return '#e9e9e9';
             }
-        })
+        });
         
 }
 
@@ -431,7 +451,8 @@ function updateScore(countryName) {
         let row = csv[i];
         // check if correct country, and if the answer is for the selected questions (from buttons)
         if (csv[i].CountryCode == countryName && ((selectedButtons.get(0) && row.question_code == "b1_a") || (selectedButtons.get(1) && row.question_code == "b1_b")
-        || (selectedButtons.get(2) && row.question_code == "b1_c") || (selectedButtons.get(3) && row.question_code == "b1_d"))) {
+        || (selectedButtons.get(2) && row.question_code == "b1_c") || (selectedButtons.get(3) && row.question_code == "b1_d"))
+        && (filterIdentities(i))) {
             var found = true;
             if (row.answer == 'Very widespread') {score += Number(row.percentage); times+=1;}
             else if (row.answer == 'Fairly widespread') {score += (2*Number(row.percentage)); times+=1;}
@@ -441,10 +462,8 @@ function updateScore(countryName) {
         }
     }
     countryScores.set(countryName, score/times);
-    // console.log(times);
     return {score: score/times, found: found, times: times};
 }
-
 
 function updateBarChart(countryCSV) {
     // clearing
@@ -533,7 +552,7 @@ function updateBarChart(countryCSV) {
     var barEnter = barElements.enter()
         .append('g')
         .attr('class', 'bar')
-        .style('fill', function(d) {return colorScale(d.key)});
+        .style('fill', function(d, i) { return colorScale(d.key); });
     // add rectangles for each bar
     barEnter.selectAll('rect')
         .data(function(d) { return d; })
@@ -554,6 +573,13 @@ function updateBarChart(countryCSV) {
             else if (i == 3) identity = "Bisexual men";
             else if (i == 4) identity = "Transgender";
             return chartPadding + yScale(identity);
+        })
+        .attr('fill', function(d, i) {
+            if ((i==0 && idenButton0) || (i==1 && idenButton1) || (i==2 && idenButton2) || (i==3 && idenButton3) || (i==4 && idenButton4)) {
+                return;
+            } else {
+                return '#e9e9e9';
+            }
         });
 
 }
@@ -563,82 +589,84 @@ function blankBarChart() {
     chartSVG.selectAll('text').remove();
     chartSVG.selectAll('g').remove();
 
-        // if country is selected, display blank chart
-        if (selectedCountry != null) {
+    // if country is selected, display blank chart
+    if (selectedCountry != null) {
 
-    // setting up data array
-    var data = [
-        {identity: 'Lesbian', veryWidespread: 0, fairlyWidespread: 0, fairlyRare: 0, veryRare: 0, idk: 1},
-        {identity: 'Gay', veryWidespread: 0, fairlyWidespread: 0, fairlyRare: 0, veryRare: 0, idk: 1},
-        {identity: 'Bisexual women', veryWidespread: 0, fairlyWidespread: 0, fairlyRare: 0, veryRare: 0, idk: 1},
-        {identity: 'Bisexual men', veryWidespread: 0, fairlyWidespread: 0, fairlyRare: 0, veryRare: 0, idk: 1},
-        {identity: 'Transgender', veryWidespread: 0, fairlyWidespread: 0, fairlyRare: 0, veryRare: 0, idk: 1} 
-    ];
-    // stack
-    var stack = d3.stack()
-        .keys(['veryWidespread', 'fairlyWidespread', 'fairlyRare', 'veryRare', 'idk']);
-    var series = stack(data);
+        // setting up data array
+        var data = [
+            {identity: 'Lesbian', veryWidespread: 0, fairlyWidespread: 0, fairlyRare: 0, veryRare: 0, idk: 1},
+            {identity: 'Gay', veryWidespread: 0, fairlyWidespread: 0, fairlyRare: 0, veryRare: 0, idk: 1},
+            {identity: 'Bisexual women', veryWidespread: 0, fairlyWidespread: 0, fairlyRare: 0, veryRare: 0, idk: 1},
+            {identity: 'Bisexual men', veryWidespread: 0, fairlyWidespread: 0, fairlyRare: 0, veryRare: 0, idk: 1},
+            {identity: 'Transgender', veryWidespread: 0, fairlyWidespread: 0, fairlyRare: 0, veryRare: 0, idk: 1} 
+        ];
+        // stack
+        var stack = d3.stack()
+            .keys(['veryWidespread', 'fairlyWidespread', 'fairlyRare', 'veryRare', 'idk']);
+        var series = stack(data);
 
-    // setting up scales
-    xScale = d3.scaleLinear()
-        .domain([0,1])
-        .range([0, chartWidth]); 
-    xAxis = d3.axisBottom(xScale);
-    chartSVG.append('g')
-        .attr('class', 'axis')
-        .attr("transform", function() {
-            return "translate(" + (chartSVGwidth - chartWidth) / 2
-            + "," + (chartSVGheight - chartPadding) + ")"
-        })
-        .call(xAxis);
-    yScale = d3.scaleBand()
-        .domain(["Lesbian", "Gay", "Bisexual women", "Bisexual men", "Transgender"])
-        .range([0, chartHeight]);
-    yAxis = d3.axisLeft(yScale);
-    chartSVG.append('g')
-        .attr('class', 'axis')
-        .attr("transform", function() {
-            return "translate(" + (chartSVGwidth - chartWidth) / 2
-            + "," + (chartPadding) + ")"
-        })
-        .call(yAxis);
+        // setting up scales
+        xScale = d3.scaleLinear()
+            .domain([0,1])
+            .range([0, chartWidth]); 
+        xAxis = d3.axisBottom(xScale);
+        chartSVG.append('g')
+            .attr('class', 'axis')
+            .attr("transform", function() {
+                return "translate(" + (chartSVGwidth - chartWidth) / 2
+                + "," + (chartSVGheight - chartPadding) + ")"
+            })
+            .call(xAxis);
+        yScale = d3.scaleBand()
+            .domain(["Lesbian", "Gay", "Bisexual women", "Bisexual men", "Transgender"])
+            .range([0, chartHeight]);
+        yAxis = d3.axisLeft(yScale);
+        chartSVG.append('g')
+            .attr('class', 'axis')
+            .attr("transform", function() {
+                return "translate(" + (chartSVGwidth - chartWidth) / 2
+                + "," + (chartPadding) + ")"
+            })
+            .call(yAxis);
 
 
-            chartSVG.append('text')
-            .text(selectedCountry)
-            .attr('class', 'title')
-            .attr('x', titlePadding)
-            .attr('y', titlePadding);
+                chartSVG.append('text')
+                .text(selectedCountry)
+                .attr('class', 'title')
+                .attr('x', titlePadding)
+                .attr('y', titlePadding);
+            
+
+        // adding bars
+        // select all elements classed bar
+        var barElements = chartSVG.selectAll('.bar')
+            .data(series);
+        // create bar gs and append to bar elements
+        var barEnter = barElements.enter()
+            .append('g')
+            .attr('class', 'bar')
+            .style('fill', function(d) {return colorScale(d.key)});
+
         
-
-    // adding bars
-    // select all elements classed bar
-    var barElements = chartSVG.selectAll('.bar')
-        .data(series);
-    // create bar gs and append to bar elements
-    var barEnter = barElements.enter()
-        .append('g')
-        .attr('class', 'bar')
-        .style('fill', function(d) {return colorScale(d.key)});
-
-    
-    barEnter.selectAll('rect')
-        .data(function(d) { return d; })
-		.enter()
-        .append('rect')
-        .attr('width', function(d, i) {
-            return (xScale(d[1]) - xScale(d[0]));
-        })
-        .attr('height', barHeight)
-        .attr('x', function (d, i) {
-            return xOff + xScale(d[0]);
-        })
-        .attr('y', function(d, i) {
-            var identity;
-            if (i == 0) identity = "Lesbian";
-            else if (i == 1) identity = "Gay";
-            else if (i == 2) identity = "Bisexual women";
-            else if (i == 3) identity = "Bisexual men";
-            else if (i == 4) identity = "Transgender";
-            return chartPadding + yScale(identity);
-        });}}
+        barEnter.selectAll('rect')
+            .data(function(d) { return d; })
+            .enter()
+            .append('rect')
+            .attr('width', function(d, i) {
+                return (xScale(d[1]) - xScale(d[0]));
+            })
+            .attr('height', barHeight)
+            .attr('x', function (d, i) {
+                return xOff + xScale(d[0]);
+            })
+            .attr('y', function(d, i) {
+                var identity;
+                if (i == 0) identity = "Lesbian";
+                else if (i == 1) identity = "Gay";
+                else if (i == 2) identity = "Bisexual women";
+                else if (i == 3) identity = "Bisexual men";
+                else if (i == 4) identity = "Transgender";
+                return chartPadding + yScale(identity);
+            });
+    }
+}
