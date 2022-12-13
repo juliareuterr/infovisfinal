@@ -1,6 +1,7 @@
 var topSVG = d3.select('#top');
 var mapSVG = d3.select("#map");
 var chartSVG = d3.select("#chart");
+var bottomSVG = d3.select("#bottom");
 
 // width and height of top svg
 const topSVGwidth = 1350;
@@ -50,13 +51,13 @@ topSVG.append('text')
     .attr('y', titlePadding);
 
 topSVG.append('text')
-    .text('In your opinion, how widespread is...')
+    .text('In your opinion, how widespread are...')
     .attr('class', 'qheader')
     .attr('x', titlePadding)
     .attr('y', titlePadding*2);
 
 topSVG.append('text')
-    .text('... about lesbian, gay, bisexual, and/or transgender people by politicians in the country where you live?')
+    .text('... about lesbian, gay, bisexual, and/or transgender people in the country where you live?')
     .attr('class', 'qheader')
     .attr('x', topSVGwidth - titlePadding)
     .attr('text-anchor', 'end')
@@ -140,6 +141,98 @@ questionButtons.selectAll('.qtext')
         else return (rectX[i] + buttonsLength[i]/2 + buttonBorder/2);//(30 + Number(d3.select(this.previousSibling).attr('x')) + Number(buttonsLength[i])/2);
     });
 
+//identity buttons
+bottomSVG.append('text')
+    .text('Identity of Respondents')
+    .attr('class', 'title')
+    .attr('x', titlePadding)
+    .attr('y', titlePadding);
+
+const idenButtonsText = ['Lesbian', 'Gay', 'Bisexual women', 'Bisexual men', 'Transgender'];
+const idenButtonsLength = [];
+const idenRectX = [];
+
+const selectedIdenButtons = new Map();
+for (let i = 0; i < 5; i++) {
+    selectedIdenButtons.set(i, false);
+}
+
+var idenButtons = bottomSVG.selectAll('rect')
+    .data(idenButtonsText)
+    .enter();
+
+idenButtons.append('rect')
+    .attr('id', function(d, i) {return 'rect' + i;})
+    .attr('class', 'qbutton')
+    .attr('y', titlePadding*4/3)
+    .attr('rx', 20)
+    .attr('ry', 20)
+
+idenButtons.append('text')
+    .text(function(d, i) {return idenButtonsText[i];})
+    .attr('class', 'qtext')
+    .attr('y', titlePadding*4/3 + 25)
+    .each(function(d, i) { idenButtonsLength[i] = this.getComputedTextLength()});
+
+idenButtons.selectAll('rect')
+    .attr('width', function(d, i) { 
+        return idenButtonsLength[i] + buttonBorder; 
+    })
+    .attr('x', function(d, i) {
+        if (i == 0) {
+            idenRectX[i] = titlePadding;
+        }
+        else {
+            idenRectX[i] = (buttonBorder*2 + Number(d3.select(this.previousSibling).attr('x')) + Number(idenButtonsLength[i-1]))
+        }
+        return idenRectX[i];
+    })
+    .on('click', function(d, i) {
+        if (selectedIdenButtons.get(i) == true) {
+            selectedIdenButtons.set(i, false);
+            bottomSVG.select('#rect' + i).attr('class', 'qbutton');
+        } else {
+            selectedIdenButtons.set(i, true);
+            bottomSVG.select('#rect' + i).attr('class', 'qbuttonpressed');
+        }
+        updateCountries();
+
+        // array that holds relevant question for selected country and all identities
+        countryCSV = [];
+
+        filterIdentities();
+
+        if (countryCSV.length > 0) {
+            updateBarChart(countryCSV);
+        } else {
+            blankBarChart();
+        }    });
+
+idenButtons.selectAll('.qtext')
+    .attr('x', function(d, i) { 
+        if (i==0) return titlePadding + idenButtonsLength[i]/2 + buttonBorder/2;
+        else return (idenRectX[i] + idenButtonsLength[i]/2 + buttonBorder/2);//(30 + Number(d3.select(this.previousSibling).attr('x')) + Number(buttonsLength[i])/2);
+    });
+
+function filterIdentities() {
+    // only include info for relevant country
+    // for the 5 identities we're using
+    var idenButton0 = selectedIdenButtons.get(0);
+    var idenButton1 = selectedIdenButtons.get(1);
+    var idenButton2 = selectedIdenButtons.get(2);
+    var idenButton3 = selectedIdenButtons.get(3);
+    var idenButton4 = selectedIdenButtons.get(4);
+    for (let i = 0; i < csv.length; ++i) {
+        if ((csv[i].CountryCode == selectedCountry)) {
+            if (csv[i].subset == "Lesbian" && idenButton0) countryCSV.push(csv[i]);
+            if (csv[i].subset == "Gay" && idenButton1) countryCSV.push(csv[i]);
+            if (csv[i].subset == "Bisexual women" && idenButton2) countryCSV.push(csv[i]);
+            if (csv[i].subset == "Bisexual men" && idenButton3) countryCSV.push(csv[i]);
+            if (csv[i].subset == "Transgender" && idenButton4) countryCSV.push(csv[i]);
+        }
+    }
+}
+
 
 d3.csv('LGBT_Survey_DailyLife.csv').then(function(dataset, json) {
     // defining map projection
@@ -215,6 +308,8 @@ d3.csv('LGBT_Survey_DailyLife.csv').then(function(dataset, json) {
                         if (csv[j].question_code == "b1_d" && button3) countryCSV.push(csv[j]);
                     }
                 }
+
+                filterIdentities();
 
                 // only update chart if the country has data
                 if (countryCSV.length > 0) {

@@ -14,6 +14,10 @@ body {
     float: right;
 }
 
+#bottom {
+    float: right;
+}
+
 .normalpath {
     opacity: 0.9;
     stroke-width: 1.7;
