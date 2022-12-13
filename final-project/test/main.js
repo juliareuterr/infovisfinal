@@ -12,7 +12,7 @@ const bottomSVGwidth = 650;
 const bottomSVGheight = 150;
 
 // width and height of map
-const w = 1000;
+const w = 900;
 const h = 800;
 
 // width and height of chart svg
@@ -357,15 +357,37 @@ d3.csv('LGBT_Survey_DailyLife.csv').then(function(dataset, json) {
 });
 
 function appendKey() {
-    // var keySVGenter = mapSVG.select('.key')
-    //     .data(['Very widespread', 'Fairly widespread', 'Fairly rare', 'Very rare', 'Unsure'])
-    //     .enter();
+    var keyg = mapSVG.append('g');
+    
+    keyg.append('text')
+        .attr('class', 'subtitle')
+        .text('Average Response')
+        .attr('transform', 'translate(710, 300)');
 
-    // keySVGenter.append('circle')
-    //     .attr('r', 6)
-    //     .style('fill', 'rgb(139, 157, 233)')
-    //     .attr('transform', 'translate(710, 130)')
-
+    var gEnter = keyg.selectAll('g')
+        .data(['Very widespread', 'Fairly widespread', 'Fairly rare', 'Very rare', 'Unsure / no data'])
+        .enter()
+        .append('g');
+    gEnter.append('rect')
+        .attr('class', 'keyrect')
+        .attr('fill', function(d, i) {
+            if (i<4) return colorScale(d);
+            else return colorScale('Don`t know');
+        })
+        .attr('width', 15)
+        .attr('height', 15)
+        .attr('x', 710)
+        .attr('y', function(d, i) {
+            return 315 + i*30;
+        });
+    gEnter.append('text')
+        .attr('class', 'keylabel')
+        .text(function(d, i) {return d;})
+        .attr('x', 740)
+        .attr('y', function(d, i) {
+            return 327 + i*30;
+        });
+        
 
 }
 
@@ -490,7 +512,7 @@ function updateBarChart(countryCSV) {
 
     // title (country name)
     chartSVG.append('text')
-        .text(selectedCountry)
+        .text('Selected country: ' + selectedCountry)
         .attr('class', 'title')
         .attr('x', titlePadding)
         .attr('y', titlePadding);
@@ -540,7 +562,7 @@ function updateBarChart(countryCSV) {
         
     // setting up scales
     xScale = d3.scaleLinear()
-        .domain([0,1])
+        .domain([0,100])
         .range([0, chartWidth]); 
     xAxis = d3.axisBottom(xScale);
     chartSVG.append('g')
@@ -577,11 +599,11 @@ function updateBarChart(countryCSV) {
 		.enter()
         .append('rect')
         .attr('width', function(d, i) {
-            return (xScale(d[1]) - xScale(d[0]));
+            return (xScale(d[1]*100) - xScale(d[0]*100));
         })
         .attr('height', barHeight)
         .attr('x', function (d, i) {
-            return xOff + xScale(d[0]);
+            return xOff + xScale(d[0]*100);
         })
         .attr('y', function(d, i) {
             var identity;
@@ -610,6 +632,12 @@ function blankBarChart() {
     // if country is selected, display blank chart
     if (selectedCountry != null) {
 
+        chartSVG.append('text')
+        .text('Selected country: ' + selectedCountry)
+        .attr('class', 'title')
+        .attr('x', titlePadding)
+        .attr('y', titlePadding);
+
         // setting up data array
         var data = [
             {identity: 'Lesbian', veryWidespread: 0, fairlyWidespread: 0, fairlyRare: 0, veryRare: 0, idk: 1},
@@ -625,7 +653,7 @@ function blankBarChart() {
 
         // setting up scales
         xScale = d3.scaleLinear()
-            .domain([0,1])
+            .domain([0,100])
             .range([0, chartWidth]); 
         xAxis = d3.axisBottom(xScale);
         chartSVG.append('g')
@@ -647,14 +675,6 @@ function blankBarChart() {
             })
             .call(yAxis);
 
-
-                chartSVG.append('text')
-                .text(selectedCountry)
-                .attr('class', 'title')
-                .attr('x', titlePadding)
-                .attr('y', titlePadding);
-            
-
         // adding bars
         // select all elements classed bar
         var barElements = chartSVG.selectAll('.bar')
@@ -671,11 +691,11 @@ function blankBarChart() {
             .enter()
             .append('rect')
             .attr('width', function(d, i) {
-                return (xScale(d[1]) - xScale(d[0]));
+                return (xScale(d[1]*100) - xScale(d[0]*100));
             })
             .attr('height', barHeight)
             .attr('x', function (d, i) {
-                return xOff + xScale(d[0]);
+                return xOff + xScale(d[0]*100);
             })
             .attr('y', function(d, i) {
                 var identity;
