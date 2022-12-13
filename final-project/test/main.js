@@ -7,12 +7,16 @@ var bottomSVG = d3.select("#bottom");
 const topSVGwidth = 1350;
 const topSVGheight = 200;
 
+// width and height of identities svg
+const bottomSVGwidth = 650;
+const bottomSVGheight = 150;
+
 // width and height of map
-const w = 800;
+const w = 1000;
 const h = 800;
 
 // width and height of chart svg
-const chartSVGwidth = 550;
+const chartSVGwidth = 650;
 const chartSVGheight = 450;
 
 // width and height of chart
@@ -348,8 +352,22 @@ d3.csv('LGBT_Survey_DailyLife.csv').then(function(dataset, json) {
                     blankBarChart();
                 }
             });
+            appendKey();
     });
 });
+
+function appendKey() {
+    // var keySVGenter = mapSVG.select('.key')
+    //     .data(['Very widespread', 'Fairly widespread', 'Fairly rare', 'Very rare', 'Unsure'])
+    //     .enter();
+
+    // keySVGenter.append('circle')
+    //     .attr('r', 6)
+    //     .style('fill', 'rgb(139, 157, 233)')
+    //     .attr('transform', 'translate(710, 130)')
+
+
+}
 
 //pass in index of csv, return whether or not that index contains a specific identity
 function filterIdentities(i) {
