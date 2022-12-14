@@ -41,7 +41,7 @@ var validSelectedCountry = false;
 // possible answers
 const answers = ['Very widespread', 'Fairly widespread', 'Fairly rare', 'Very rare', 'Don`t know'];
 // possible colors
-const colors = ['#ff5035','#ff7c68','#ffa89b','#ffc3ba', '#e9e9e9']
+const colors = ['#ff3010','#ff5f47','#fc9080','#ffd2cb', '#e9e9e9']
 // color scale
 var colorScale = d3.scaleOrdinal().domain(answers).range(colors);
 
@@ -55,7 +55,7 @@ const countryScores = new Map();
 
 // ---- Button variables ----
 // possible questions
-const buttonsText = ['Offensive language', 'Casual jokes', 'Expressions of hatred and aversion', 'Assaults and harrassment'];
+const buttonsText = ['Offensive language from politicans', 'Casual jokes', 'Expressions of hatred and aversion', 'Assaults and harrassment'];
 // width of question buttons
 const buttonsWidth = [];
 // x position of question buttons
@@ -186,7 +186,7 @@ questionButtons.selectAll('.qtext')
 
 // setting up title in bottom SVG
 bottomSVG.append('text')
-    .text('Identity of respondents')
+    .text('Identity of Respondents')
     .attr('class', 'subtitle')
     .attr('x', titlePadding)
     .attr('y', titlePadding);
@@ -278,7 +278,7 @@ var keyg = mapSVG.append('g');
 // add key title
 keyg.append('text')
     .attr('class', 'subtitle')
-    .text('Relative hostility')
+    .text('Relative Hostility')
     .attr('transform', 'translate(710, 300)');
 // enter categories
 var gEnter = keyg.selectAll('g')
@@ -509,7 +509,7 @@ function updateBarChart(countryCSV) {
 
     // add title (country name)
     chartSVG.append('text')
-        .text(selectedCountry + ' response breakdown')
+        .text(selectedCountry + ' Response Breakdown')
         .attr('class', 'subtitle')
         .attr('x', titlePadding)
         .attr('y', titlePadding);
@@ -621,10 +621,10 @@ function updateBarChart(countryCSV) {
                 chartSVG.append('text')
                 .text(function() {
                     // checking text to display based on color of rect
-                    if (fill == 'rgb(255, 80, 53)') return 'Very widespread';
-                    else if (fill == 'rgb(255, 124, 104)') return 'Fairly widespread';
-                    else if (fill == 'rgb(255, 168, 155)') return 'Fairly rare';
-                    else if (fill == 'rgb(255, 195, 186)') return 'Very rare';
+                    if (fill == 'rgb(255, 48, 16)') return 'Very widespread';
+                    else if (fill == 'rgb(255, 95, 71)') return 'Fairly widespread';
+                    else if (fill == 'rgb(252, 144, 128)') return 'Fairly rare';
+                    else if (fill == 'rgb(255, 210, 203)') return 'Very rare';
                     else return 'Not sure';
                 })
                 .attr('class', 'hovertext')
@@ -732,7 +732,7 @@ function blankBarChart() {
         // add title (country name)
         chartSVG.append('text')
         .text(function(d, i) {
-            if (validSelectedCountry) return selectedCountry + ' response breakdown';
+            if (validSelectedCountry) return selectedCountry + ' Response Breakdown';
             else if (selectedCountry) return selectedCountry + ' is not a member of the EU'
             else return 'No selected country';
         })
