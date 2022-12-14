@@ -88,7 +88,7 @@ body {
 .qbuttonpressed {
     height: 40px;
     pointer-events: all;
-    fill: rgb(209, 209, 209);
+    fill: rgb(179, 179, 179);
 }
 
 .qtext {
