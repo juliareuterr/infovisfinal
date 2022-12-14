@@ -279,10 +279,10 @@ var keyg = mapSVG.append('g');
 keyg.append('text')
     .attr('class', 'subtitle')
     .text('Relative Hostility')
-    .attr('transform', 'translate(710, 300)');
+    .attr('transform', 'translate(710, 154)');
 // enter categories
 var gEnter = keyg.selectAll('g')
-    .data(['Very widespread', 'Fairly widespread', 'Fairly rare', 'Very rare', 'Unsure', 'No data / not selected'])
+    .data(['Very widespread', 'Fairly widespread', 'Fairly rare', 'Very rare', 'Unsure'])
     .enter()
     .append('g');
 // for each category, add color rect and label
@@ -292,20 +292,34 @@ gEnter.append('rect')
     .attr('width', 15)
     .attr('height', 15)
     .attr('x', 710)
-    .attr('y', function(d, i) { return 315 + i*30; });
+    .attr('y', function(d, i) { return 175 + i*30; });
 gEnter.append('text')
     .attr('class', 'keylabel')
     .text(function(d, i) {return d;})
     .attr('x', 740)
-    .attr('y', function(d, i) { return 327 + i*30; });
+    .attr('y', function(d, i) { return 187 + i*30; });
+
+var selectedg = keyg.select('g');
+selectedg.append('rect')
+        .attr('fill', function(d, i) { return ('#e9e9e9'); })
+        .attr('width', 15)
+        .attr('height', 15)
+        .attr('x', 710)
+        .attr('y', function(d, i) { return 175 + 5*30; });
+
+selectedg.append('text')
+    .attr('class', 'keylabel')
+    .text('No data / not selected')
+    .attr('x', 740)
+    .attr('y', function(d, i) { return 187 + 5*30; });
 
 // loading CSV
 d3.csv('LGBT_Survey_DailyLife.csv').then(function(dataset) {
     // defining map projection
-    let projection = d3.geoMercator()
+    let projection = d3.geoConicConformal()
         .center([15, 54])
         .translate([(w / 2) + 20, (h / 2) + 45])
-        .scale(600);
+        .scale(1000);
 
     // defining path generator for geoJSON
     let path = d3.geoPath()
@@ -625,7 +639,7 @@ function updateBarChart(countryCSV) {
                     else if (fill == 'rgb(255, 95, 71)') return 'Fairly widespread';
                     else if (fill == 'rgb(252, 144, 128)') return 'Fairly rare';
                     else if (fill == 'rgb(255, 210, 203)') return 'Very rare';
-                    else return 'Not sure';
+                    else if (fill == 'rgb(225, 209, 209)') return 'Not sure';
                 })
                 .attr('class', 'hovertext')
                 .attr('id', 'hovering2text')
