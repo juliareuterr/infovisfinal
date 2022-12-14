@@ -625,7 +625,7 @@ function updateBarChart(countryCSV) {
                     else if (fill == 'rgb(255, 95, 71)') return 'Fairly widespread';
                     else if (fill == 'rgb(252, 144, 128)') return 'Fairly rare';
                     else if (fill == 'rgb(255, 210, 203)') return 'Very rare';
-                    else return 'Not sure';
+                    else if (fill == 'rgb(225, 209, 209)') return 'Not sure';
                 })
                 .attr('class', 'hovertext')
                 .attr('id', 'hovering2text')
