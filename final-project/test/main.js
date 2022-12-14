@@ -41,7 +41,7 @@ var validSelectedCountry = false;
 // possible answers
 const answers = ['Very widespread', 'Fairly widespread', 'Fairly rare', 'Very rare', 'Don`t know'];
 // possible colors
-const colors = ['#ff3010','#ff5f47','#fc9080','#ffd2cb', '#e9e9e9']
+const colors = ['#ff3010','#ff5f47','#fc9080','#ffd2cb', '#e1d1d1', '#e9e9e9']
 // color scale
 var colorScale = d3.scaleOrdinal().domain(answers).range(colors);
 
@@ -282,13 +282,13 @@ keyg.append('text')
     .attr('transform', 'translate(710, 300)');
 // enter categories
 var gEnter = keyg.selectAll('g')
-    .data(['Very widespread', 'Fairly widespread', 'Fairly rare', 'Very rare', 'Unsure / no data'])
+    .data(['Very widespread', 'Fairly widespread', 'Fairly rare', 'Very rare', 'Unsure', 'No data / not selected'])
     .enter()
     .append('g');
 // for each category, add color rect and label
 gEnter.append('rect')
     .attr('class', 'keyrect')
-    .attr('fill', function(d, i) { return ((i < 4) ? colorScale(d) : colorScale('Don`t know')); })
+    .attr('fill', function(d, i) { return ((i < 4) ? colorScale(d) : (i < 5) ? colorScale('Don`t know') : '#e9e9e9'); })
     .attr('width', 15)
     .attr('height', 15)
     .attr('x', 710)
@@ -608,7 +608,7 @@ function updateBarChart(countryCSV) {
                 else if (d3.select(this.parentNode).attr('id') == 'bar1') return colorScale('Fairly widespread');
                 else if (d3.select(this.parentNode).attr('id') == 'bar2') return colorScale('Fairly rare');
                 else if (d3.select(this.parentNode).attr('id') == 'bar3') return colorScale('Very rare');
-                else return '#e9e9e9'
+                else return '#e1d1d1'
             } else {
                 // identity not selected, fill with grey
                 return '#e9e9e9';
@@ -701,7 +701,7 @@ function initializeBarChart() {
     var barEnter = barElements.enter()
         .append('g')
         .attr('class', 'bar')
-        .style('fill', function(d) {return colorScale(d.key)});
+        .style('fill', function(d) {return '#e9e9e9'});
     // add rectangles for each answer
     barEnter.selectAll('rect')
         .data(function(d) { return d; })
@@ -788,7 +788,7 @@ function blankBarChart() {
         var barEnter = barElements.enter()
             .append('g')
             .attr('class', 'bar')
-            .style('fill', function(d) {return colorScale(d.key)});
+            .style('fill', function(d) {return '#e9e9e9'});
 
         // add rectangles for each answer
         barEnter.selectAll('rect')
