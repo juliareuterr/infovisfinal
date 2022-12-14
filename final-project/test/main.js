@@ -617,18 +617,19 @@ function updateBarChart(countryCSV) {
         .on('mouseover', function(d) {
             // if mouse over the bar, show legend
             if (validSelectedCountry) {
+                var fill = d3.select(this).style('fill');
                 chartSVG.append('text')
                 .text(function() {
                     // checking text to display based on color of rect
-                    if (d3.select(this).style('fill') == 'rgb(255, 80, 53)') return 'Very widespread';
-                    else if (d3.select(this).style('fill') == 'rgb(255, 124, 104)') return 'Fairly widespread';
-                    else if (d3.select(this).style('fill') == 'rgb(255, 168, 155)') return 'Fairly rare';
-                    else if (d3.select(this).style('fill') == 'rgb(255, 195, 186)') return 'Very rare';
+                    if (fill == 'rgb(255, 80, 53)') return 'Very widespread';
+                    else if (fill == 'rgb(255, 124, 104)') return 'Fairly widespread';
+                    else if (fill == 'rgb(255, 168, 155)') return 'Fairly rare';
+                    else if (fill == 'rgb(255, 195, 186)') return 'Very rare';
                     else return 'Not sure';
                 })
                 .attr('class', 'hovertext')
                 .attr('id', 'hovering2text')
-                .style('fill', function() { return d3.select(this).style('fill'); })
+                .style('fill', function() { return fill; })
                 .attr('x', function () { return xOff + xScale(d[0]) + (xScale(d[1]) - xScale(d[0]))/2; })
                 .attr('y', function(data, i) {
                     if (i == 0) return chartPadding + yScale('Lesbian') - 5;
