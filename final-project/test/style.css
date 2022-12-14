@@ -65,6 +65,13 @@ body {
     fill: black;
 }
 
+.subtitle {
+    font-family: sans-serif;
+    font-weight:550;
+    font-size: 18px;
+    fill: black;
+}
+
 .qheader {
     font-family: sans-serif;
     font-size: 16px;
@@ -87,9 +94,9 @@ body {
 .qtext {
     font-family: sans-serif;
     text-anchor: middle;
-    font-size: 16px;
+    font-size: 15px;
     fill: black;
-    font-weight:bold;
+    font-weight:600;
     pointer-events: none;
 }
 
@@ -100,7 +107,14 @@ body {
 
 .axis text {
     font-family: sans-serif;
-    font-weight: bold;
-    font-size: 12px;
-    fill: darkgrey;
+    font-weight: 500;
+    font-size: 13px;
+    fill: black;
+}
+
+.keylabel {
+    font-family: sans-serif;
+    font-weight:500;
+    font-size: 16px;
+    fill: black;
 }
